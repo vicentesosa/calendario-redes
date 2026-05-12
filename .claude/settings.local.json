@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"from reportlab.lib.pagesizes import A4; print\\('reportlab ok'\\)\")",
+      "Bash(python -c \"import PyPDF2; print\\(PyPDF2.__version__\\)\")",
+      "Bash(python -c \"from reportlab.lib.pagesizes import A4; print\\('only reportlab'\\)\")",
+      "Bash(pip install *)",
+      "Bash(python -c \"import pypdf; print\\(pypdf.__version__\\)\")",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "mcp__Claude_Preview__preview_start",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(git init *)",
+      "Bash(git branch *)",
+      "Bash(git remote *)",
+      "Bash(git add *)"
+    ]
+  }
+}

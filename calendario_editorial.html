@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendario Editorial · Personal Branding Dev</title>
+  <style>
+    :root {
+      --indigo:    #6366f1;
+      --indigo-dk: #4f46e5;
+      --indigo-lt: #eef2ff;
+      --dark:      #0f172a;
+      --slate:     #475569;
+      --muted:     #94a3b8;
+      --border:    #e2e8f0;
+      --tiktok:    #fe2c55;
+      --tt-l:      #fff0f2;
+      --tt-a:      #ffe4ea;
+      --ig:        #c13584;
+      --ig-l:      #fdf0f8;
+      --ig-a:      #f0e6f6;
+      --bg:        #f8fafc;
+      --surface:   #ffffff;
+      --green:     #16a34a;
+      --green-lt:  #f0fdf4;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--dark);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .page {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 28px 16px 48px;
+    }
+
+    /* ── Header ─────────────────────────────────────── */
+    .header {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+    .header h1 {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--dark);
+      letter-spacing: -.02em;
+    }
+    .header .sub {
+      font-size: 12px;
+      color: var(--slate);
+      margin-top: 5px;
+    }
+    .pills { margin-top: 8px; }
+    .pill {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 20px;
+      margin: 0 2px;
+      letter-spacing: .05em;
+    }
+    .pill.tt { background: var(--tt-l); color: var(--tiktok); }
+    .pill.ig { background: var(--ig-l); color: var(--ig); }
+
+    /* ── Tabs ───────────────────────────────────────── */
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 18px;
+      gap: 3px;
+    }
+    .tab-btn {
+      padding: 9px 20px;
+      border: none;
+      background: transparent;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--slate);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      border-radius: 4px 4px 0 0;
+      transition: color .15s, background .15s, border-color .15s;
+    }
+    .tab-btn.active {
+      color: var(--indigo);
+      border-bottom-color: var(--indigo);
+      background: var(--indigo-lt);
+    }
+    .tab-btn:hover:not(.active) {
+      color: var(--dark);
+      background: #f1f5f9;
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Calendar table ─────────────────────────────── */
+    .cal-wrap {
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,.09), 0 0 0 1px var(--border);
+    }
+    .cal-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    /* Header row */
+    .cal-table thead tr { background: #1e293b; }
+    .cal-table thead th {
+      padding: 11px 12px;
+      font-size: 10px;
+      font-weight: 700;
+      text-align: left;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .cal-table thead th.th-qty { text-align: center; width: 80px; }
+
+    /* Data rows */
+    .cal-row td {
+      padding: 9px 12px;
+      vertical-align: middle;
+      border-bottom: 1px solid var(--border);
+      font-size: 12.5px;
+    }
+    .cal-row td.td-qty { text-align: center; }
+
+    .cal-row.tt-e { background: var(--tt-l); }
+    .cal-row.tt-o { background: var(--tt-a); }
+    .cal-row.ig-e { background: var(--ig-l); }
+    .cal-row.ig-o { background: var(--ig-a); }
+
+    .day-cell { font-weight: 700; color: var(--dark); display: flex; align-items: center; gap: 8px; }
+    .date-tag {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      letter-spacing: .02em;
+      flex-shrink: 0;
+    }
+
+    /* Platform badge */
+    .badge {
+      display: inline-block;
+      font-weight: 700;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+    .badge.tt { color: var(--tiktok); background: rgba(254,44,85,.10); }
+    .badge.ig { color: var(--ig);     background: rgba(193,53,132,.10); }
+
+    .fmt-cell { color: #334155; }
+
+    /* Qty + arrow */
+    .qty-wrap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+    .qty-num {
+      font-weight: 800;
+      font-size: 14px;
+      min-width: 14px;
+    }
+    .arrow-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px; height: 22px;
+      background: var(--indigo);
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background .15s;
+    }
+    .arrow-btn:hover { background: var(--indigo-dk); }
+    .arrow-btn svg   { transition: transform .22s ease; }
+    .arrow-btn.open  { background: var(--indigo-dk); }
+    .arrow-btn.open svg { transform: rotate(180deg); }
+
+    /* ── Idea expansion row ─────────────────────────── */
+    .idea-row { display: none; }
+    .idea-row.open { display: table-row; }
+
+    .idea-cell {
+      padding: 0 !important;
+      border-bottom: 2px solid var(--indigo) !important;
+    }
+    .idea-panel {
+      padding: 14px 16px 16px 20px;
+      background: #f0f4ff;
+      border-left: 4px solid var(--indigo);
+      animation: slideIn .18s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .idea-label {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--indigo);
+      margin-bottom: 8px;
+    }
+    .idea-desc {
+      font-size: 12.5px;
+      color: #1e293b;
+      margin-bottom: 9px;
+      line-height: 1.6;
+    }
+    .idea-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .idea-list li {
+      font-size: 12px;
+      color: #334155;
+      padding-left: 17px;
+      position: relative;
+      line-height: 1.55;
+    }
+    .idea-list li::before {
+      content: "▸";
+      position: absolute;
+      left: 0;
+      color: var(--indigo);
+      font-size: 11px;
+    }
+
+    /* ── Summary tab ────────────────────────────────── */
+    .sum-section { margin-bottom: 26px; }
+    .sum-section h2 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 13px;
+      padding-bottom: 9px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .sum-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+    }
+    .sum-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 13px 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .sum-card .count {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .sum-card .lbl { font-size: 12px; font-weight: 600; }
+    .sum-card .plat { font-size: 10.5px; color: var(--slate); }
+
+    .sum-card.tt       { border-top: 3px solid var(--tiktok); }
+    .sum-card.tt .count { color: var(--tiktok); }
+    .sum-card.ig       { border-top: 3px solid var(--ig); }
+    .sum-card.ig .count { color: var(--ig); }
+    .sum-card.hist     { border-top: 3px solid var(--green); }
+    .sum-card.hist .count { color: var(--green); }
+    .sum-card.feed     { border-top: 3px solid var(--indigo); }
+    .sum-card.feed .count { color: var(--indigo); }
+
+    .logic-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--indigo);
+      border-radius: 9px;
+      padding: 15px 18px;
+    }
+    .logic-box ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+    .logic-box li {
+      font-size: 12.5px;
+      color: var(--dark);
+      padding-left: 20px;
+      position: relative;
+      line-height: 1.5;
+    }
+    .logic-box li::before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: var(--indigo);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>Calendario Editorial Semanal</h1>
+    <p class="sub">Personal Branding · Desarrollador Web</p>
+    <div class="pills">
+      <span class="pill tt">TikTok</span>
+      <span class="pill ig">Instagram</span>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('semana', this)">📅&nbsp; Semana</button>
+    <button class="tab-btn" onclick="showTab('resumen', this)">📊&nbsp; Resumen</button>
+  </div>
+
+  <!-- ══════════════ TAB SEMANA ══════════════ -->
+  <div id="tab-semana" class="tab-panel active">
+    <div class="cal-wrap">
+      <table class="cal-table">
+        <thead>
+          <tr>
+            <th>Día</th>
+            <th>Plataforma</th>
+            <th>Formato</th>
+            <th class="th-qty">Cant.</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- ── LUNES ── -->
+          <tr class="cal-row tt-e">
+            <td class="day-cell"><span class="date-tag">18/5</span>Lunes</td>
+            <td><span class="badge tt">TikTok</span></td>
+            <td class="fmt-cell">Video</td>
+            <td class="td-qty">
+              <div class="qty-wrap">
+                <span class="qty-num">1</span>
+                <button class="arrow-btn" onclick="toggle(this,'i0')">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M2 3.5L5 6.5L8 3.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr class="idea-row" id="i0">
+            <td colspan="4" class="idea-cell">
+              <div class="idea-panel">
+                <div class="idea-label">💡 Lunes · TikTok · Video</div>
+                <p class="idea-desc">Mostrá tu rutina diaria como desarrollador joven que equilibra la secundaria con proyectos de código. Sé auténtico y cercano.</p>
+                <ul class="idea-list">
+                  <li>Grabá cómo organizás el día entre clases y código con tus herramientas reales</li>
+                  <li>Mostrá qué abrís apenas arrancás: VS Code, GitHub, Notion o tu stack habitual</li>
+                  <li>Un vistazo al avance de tu plataforma de organización estudiantil en construcción</li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+
+          <tr class="cal-row ig-o">
+            <td class="day-cell"><span class="date-tag">18/5</span>Lunes</td>
+            <td><span class="badge ig">Instagram</span></td>
+            <td class="fmt-cell">Historia</td>
+            <td class="td-qty">
+              <div class="qty-wrap">
+                <span class="qty-num">3</span>
+                <button class="arrow-btn" onclick="toggle(this,'i1')">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M2 3.5L5 6.5L8 3.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr class="idea-row" id="i1">
+            <td colspan="4" class="idea-cell">
+              <div class="idea-panel">
+                <div class="idea-label">💡 Lunes · Instagram · Historias ×3</div>
+                <ul class="idea-list">
+                  <li><strong>Historia 1 — Setup matutino:</strong> Mostrá el escritorio, el IDE abierto y el café o mate para arrancar el día</li>
+                  <li><strong>Historia 2 — Encuesta:</strong> Preguntá sobre preferencias técnicas de tu audiencia (¿React o Vue? ¿VS Code o WebStorm?)</li>
+                  <li><strong>Historia 3 — Preview del proyecto:</strong> Un vistazo rápido al desarrollo de tu plataforma de organización estudiantil</li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+
+          <!-- ── MARTES ── -->
+          <tr class="cal-row ig-e">
+            <td class="day-cell"><span class="date-tag">19/5</span>Martes</td>
+            <td><span class="badge ig">Instagram</span></td>
+            <td class="fmt-cell">Reel</td>
+            <td class="td-qty">
+              <div class="qty-wrap">
+                <span class="qty-num">1</span>
+                <button class="arrow-btn" onclick="toggle(this,'i2')">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M2 3.5L5 6.5L8 3.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr class="idea-row" id="i2">
+            <td colspan="4" class="idea-cell">
+              <div class="idea-panel">
+                <div class="idea-label">💡 Martes · Instagram · Reel</div>
+                <p class="idea-desc">Destacá las herramientas de flujo de trabajo que todo dev debería conocer. Formato ágil y dinámico, ideal para el algoritmo de Reels.</p>
+                <ul class="idea-list">
+                  <li>Tutorial rápido de Git: commits, branches y pull requests en menos de 45 segundos</li>
+                  <li>Top extensiones de VS Code que usás todos los días y por qué cambian el juego</li>
+                  <li>Tu stack completo de productividad: diseño, organización y código en una pantalla</li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+
+          <tr class="cal-row ig-o">
+            <td class="day-cell"><span class="date-tag">19/5</span>Martes</td>
+            <td><span class="badge ig">Instagram</span></td>
+            <td class="fmt-cell">Historia</td>
+            <td class="td-qty">
+              <div class="qty-wrap">
+                <span class="qty-num">3</span>
+                <button class="arrow-btn" onclick="toggle(this,'i3')">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M2 3.5L5 6.5L8 3.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr class="idea-row" id="i3">
+            <td colspan="4" class="idea-cell">
+              <div class="idea-panel">
+                <div class="idea-label">💡 Martes · Instagram · Historias ×3</div>
+                <p class="idea-desc">Documentá el proceso real de programación en tres actos para humanizar tu trabajo y conectar con otros devs.</p>
+                <ul class="idea-list">
+                  <li><strong>Historia 1 — El bug:</strong> Mostrá el error que apareció hoy sin filtros, captura de pantalla incluida</li>
+                  <li><strong>Historia 2 — La búsqueda:</strong> El proceso real investigando la solución, Stack Overflow y todo incluido</li>
+                  <li><strong>Historia 3 — La resolución:</strong> Cómo lo resolviste y qué aprendiste del proceso completo</li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+
+          <!-- ── MIÉRCOLES ── -->
+          <tr class="cal-row ig-e">
+            <td class="day-cell"><span class="date-tag">20/5</span>Miércoles</td>
+            <td><span class="badge ig">Instagram</span></td>
+            <td class="fmt-cell">Historia</td>
+            <td class="td-qty">
+              <div class="qty-wrap">
+                <span class="qty-num">3</span>
+                <button class="arrow-btn" onclick="toggle(this,'i4')">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M2 3.5L5 6.5L8 3.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr class="idea-row" id="i4">
+            <td colspan="4" class="idea-cell">
+              <div class="idea-panel">
+                <div class="idea-label">💡 Miércoles · Instagram · Historias ×3</div>
+                <ul class="idea-list">
+                  <li><strong>Historia 1 — Diseño gráfico:</strong> Avance del diseño de materiales para talleres: flyers, banners o presentaciones en proceso</li>
+                  <li><strong>Historia 2 — CSS tip:</strong> Un truco rápido de CSS que aprendiste o aplicaste hoy, con captura de pantalla del código</li>
+                  <li><strong>Historia 3 — Behind the scenes:</strong> El proceso detrás del posteo de feed que acabás de publicar</li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+
+          <tr class="cal-row ig-o">
+            <td class="day-cell"><span class="date-tag">20/5</span>Miércoles</td>
+            <td><span class="badge ig">Instagram (Feed)</span></td>
+            <td class="fmt-cell">Posteo estático</td>
+            <td class="td-qty">
+              <div class="qty-wrap">
+                <span class="qty-num">1</span>
+                <button class="arrow-btn" onclick="toggle(this,'i5')">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M2 3.5L5 6.5L8 3.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr class="idea-row" id="i5">
+            <td colspan="4" class="idea-cell">
+              <div class="idea-panel">
+                <div class="idea-label">💡 Miércoles · Feed · Posteo estático</div>
+                <p class="idea-desc">El feed es tu portfolio visible. Publicá capturas de alta calidad de proyectos terminados que muestren tu nivel técnico y estético.</p>
+                <ul class="idea-list">
+                  <li>Réplica de un sitio oficial con alta fidelidad visual y buena composición fotográfica</li>
+                  <li>Portfolio para un cliente real o ficticio bien terminado con tipografía y colores cuidados</li>
+                  <li>Antes y después de un rediseño web mostrando la evolución del proyecto</li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+
+          <!-- ── JUEVES ── -->
+          <tr class="cal-row tt-e">
+            <td class="day-cell"><span class="date-tag">21/5</span>Jueves</td>
+            <td><span class="badge tt">TikTok</span></td>
+            <td class="fmt-cell">Video</td>
+            <td class="td-qty">
+              <div class="qty-wrap">
+                <span class="qty-num">1</span>
+                <button class="arrow-btn" onclick="toggle(this,'i6')">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M2 3.5L5 6.5L8 3.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr class="idea-row" id="i6">
+            <td colspan="4" class="idea-cell">
+              <div class="idea-panel">
+                <div class="idea-label">💡 Jueves · TikTok · Video</div>
+                <p class="idea-desc">Hablá de tus metas académicas y tu decisión de estudiar Ingeniería en Sistemas. La honestidad construye comunidad con otros estudiantes en la misma encrucijada.</p>
+                <ul class="idea-list">
+                  <li>¿Por qué elegiste Ingeniería en Sistemas? Contá la historia real detrás de la decisión</li>
+                  <li>Tus metas del año: proyectos a terminar, materias a aprobar, habilidades a aprender</li>
+                  <li>La realidad sin filtros de estudiar y programar al mismo tiempo siendo joven</li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+
+          <tr class="cal-row ig-o">
+            <td class="day-cell"><span class="date-tag">21/5</span>Jueves</td>
+            <td><span class="badge ig">Instagram</span></td>
+            <td class="fmt-cell">Historia</td>
+            <td class="td-qty">
+              <div class="qty-wrap">
+                <span class="qty-num">2</span>
+                <button class="arrow-btn" onclick="toggle(this,'i7')">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M2 3.5L5 6.5L8 3.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr class="idea-row" id="i7">
+            <td colspan="4" class="idea-cell">
+              <div class="idea-panel">
+                <div class="idea-label">💡 Jueves · Instagram · Historias ×2</div>
+                <ul class="idea-list">
+                  <li><strong>Historia 1 — Caja de preguntas:</strong> Abrí una Q&amp;A para que te consulten sobre desarrollo, la carrera de Sistemas o tus proyectos</li>
+                  <li><strong>Historia 2 — Respuestas en vivo:</strong> Respondé en tiempo real las preguntas más interesantes que llegaron del video de TikTok</li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+
+          <!-- ── VIERNES ── -->
+          <tr class="cal-row ig-e">
+            <td class="day-cell"><span class="date-tag">22/5</span>Viernes</td>
+            <td><span class="badge ig">Instagram</span></td>
+            <td class="fmt-cell">Reel</td>
+            <td class="td-qty">
+              <div class="qty-wrap">
+                <span class="qty-num">1</span>
+                <button class="arrow-btn" onclick="toggle(this,'i8')">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M2 3.5L5 6.5L8 3.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr class="idea-row" id="i8">
+            <td colspan="4" class="idea-cell">
+              <div class="idea-panel">
+                <div class="idea-label">💡 Viernes · Instagram · Reel</div>
+                <p class="idea-desc">El formato "proceso vs. resultado" es uno de los que más engagement genera en contenido técnico. El contraste visual engancha desde el primer segundo.</p>
+                <ul class="idea-list">
+                  <li>Desde el esquema en papel o Figma hasta el sitio web terminado en producción</li>
+                  <li>Mostrá el primer commit vs. el resultado final del proyecto de la semana</li>
+                  <li>Wireframe → diseño → código → deploy: el ciclo completo en 30 segundos</li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+
+          <tr class="cal-row ig-o">
+            <td class="day-cell"><span class="date-tag">22/5</span>Viernes</td>
+            <td><span class="badge ig">Instagram</span></td>
+            <td class="fmt-cell">Historia</td>
+            <td class="td-qty">
+              <div class="qty-wrap">
+                <span class="qty-num">3</span>
+                <button class="arrow-btn" onclick="toggle(this,'i9')">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M2 3.5L5 6.5L8 3.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr class="idea-row" id="i9">
+            <td colspan="4" class="idea-cell">
+              <div class="idea-panel">
+                <div class="idea-label">💡 Viernes · Instagram · Historias ×3</div>
+                <ul class="idea-list">
+                  <li><strong>Historia 1 — Gym / hábito:</strong> Una historia del entreno o del hábito saludable que mantenés para mostrar el lado humano del perfil</li>
+                  <li><strong>Historia 2 — Cierre semanal:</strong> Celebrá los logros de la semana, por pequeños que sean. Autenticidad ante todo</li>
+                  <li><strong>Historia 3 — Preview del finde:</strong> Qué vas a hacer, qué vas a aprender, qué hay el lunes que viene</li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+
+          <!-- ── SÁBADO ── -->
+          <tr class="cal-row ig-e">
+            <td class="day-cell"><span class="date-tag">23/5</span>Sábado</td>
+            <td><span class="badge ig">Instagram</span></td>
+            <td class="fmt-cell">Historia</td>
+            <td class="td-qty">
+              <div class="qty-wrap">
+                <span class="qty-num">2</span>
+                <button class="arrow-btn" onclick="toggle(this,'i10')">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M2 3.5L5 6.5L8 3.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr class="idea-row" id="i10">
+            <td colspan="4" class="idea-cell">
+              <div class="idea-panel">
+                <div class="idea-label">💡 Sábado · Instagram · Historias ×2</div>
+                <ul class="idea-list">
+                  <li><strong>Historia 1 — Ocio real:</strong> Mostrá un momento de descanso genuino: serie, salida, juego. Lo que sea que estés haciendo</li>
+                  <li><strong>Historia 2 — Finde:</strong> Contenido relajado y humano sin presión de rendimiento ni productividad obligatoria</li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+
+          <tr class="cal-row ig-o">
+            <td class="day-cell"><span class="date-tag">23/5</span>Sábado</td>
+            <td><span class="badge ig">Instagram (Feed)</span></td>
+            <td class="fmt-cell">Carrusel</td>
+            <td class="td-qty">
+              <div class="qty-wrap">
+                <span class="qty-num">1</span>
+                <button class="arrow-btn" onclick="toggle(this,'i11')">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M2 3.5L5 6.5L8 3.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr class="idea-row" id="i11">
+            <td colspan="4" class="idea-cell">
+              <div class="idea-panel">
+                <div class="idea-label">💡 Sábado · Feed · Carrusel</div>
+                <p class="idea-desc">El carrusel es el formato ideal para contenido técnico en profundidad. Explicá la arquitectura de uno de tus proyectos propios.</p>
+                <ul class="idea-list">
+                  <li><strong>Slide 1:</strong> Título del proyecto y el problema concreto que resuelve</li>
+                  <li><strong>Slides 2–4:</strong> Arquitectura técnica: stack, estructura de carpetas, decisiones de diseño clave</li>
+                  <li><strong>Slide 5:</strong> Cómo beneficia a los usuarios y qué resultados obtenés</li>
+                  <li><strong>Último slide:</strong> CTA para ver el repositorio, el deploy o seguir el perfil</li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+
+          <!-- ── DOMINGO ── -->
+          <tr class="cal-row tt-e">
+            <td class="day-cell"><span class="date-tag">24/5</span>Domingo</td>
+            <td><span class="badge tt">TikTok</span></td>
+            <td class="fmt-cell">Video</td>
+            <td class="td-qty">
+              <div class="qty-wrap">
+                <span class="qty-num">1</span>
+                <button class="arrow-btn" onclick="toggle(this,'i12')">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M2 3.5L5 6.5L8 3.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr class="idea-row" id="i12">
+            <td colspan="4" class="idea-cell">
+              <div class="idea-panel">
+                <div class="idea-label">💡 Domingo · TikTok · Video</div>
+                <p class="idea-desc">Una reflexión honesta cierra la semana con mucha autenticidad. Sin filtros y desde el corazón, este formato genera conexión real con la audiencia.</p>
+                <ul class="idea-list">
+                  <li>¿Qué funcionó técnicamente esta semana? ¿Qué falló y por qué?</li>
+                  <li>El error más importante que cometiste y la lección que te dejó</li>
+                  <li>Qué harías diferente si pudieras repetir la semana desde cero</li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+
+          <tr class="cal-row ig-o">
+            <td class="day-cell"><span class="date-tag">24/5</span>Domingo</td>
+            <td><span class="badge ig">Instagram</span></td>
+            <td class="fmt-cell">Historia</td>
+            <td class="td-qty">
+              <div class="qty-wrap">
+                <span class="qty-num">2</span>
+                <button class="arrow-btn" onclick="toggle(this,'i13')">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                    <path d="M2 3.5L5 6.5L8 3.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr class="idea-row" id="i13">
+            <td colspan="4" class="idea-cell">
+              <div class="idea-panel">
+                <div class="idea-label">💡 Domingo · Instagram · Historias ×2</div>
+                <ul class="idea-list">
+                  <li><strong>Historia 1 — Reset workspace:</strong> Mostrá cómo reorganizás tu espacio de trabajo para arrancar el lunes con energía y enfoque total</li>
+                  <li><strong>Historia 2 — Objetivos del lunes:</strong> Compartí 2 o 3 metas concretas y medibles para la semana que empieza</li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══════════════ TAB RESUMEN ══════════════ -->
+  <div id="tab-resumen" class="tab-panel">
+
+    <div class="sum-section">
+      <h2>Totales semanales</h2>
+      <div class="sum-grid">
+        <div class="sum-card tt">
+          <span class="count">3</span>
+          <span class="lbl">Videos</span>
+          <span class="plat">TikTok</span>
+        </div>
+        <div class="sum-card ig">
+          <span class="count">2</span>
+          <span class="lbl">Reels</span>
+          <span class="plat">Instagram</span>
+        </div>
+        <div class="sum-card hist">
+          <span class="count">18</span>
+          <span class="lbl">Historias</span>
+          <span class="plat">Instagram</span>
+        </div>
+        <div class="sum-card feed">
+          <span class="count">1</span>
+          <span class="lbl">Posteo estático</span>
+          <span class="plat">Instagram Feed</span>
+        </div>
+        <div class="sum-card feed">
+          <span class="count">1</span>
+          <span class="lbl">Carrusel</span>
+          <span class="plat">Instagram Feed</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sum-section">
+      <h2>Lógica de distribución</h2>
+      <div class="logic-box">
+        <ul>
+          <li><strong>TikTok</strong> publica lunes, jueves y domingo — frecuencia de cada 3 días sin saturar el canal</li>
+          <li><strong>Reels</strong> publican martes y viernes — nunca coinciden con los días de TikTok</li>
+          <li><strong>Historias</strong> presentes los 7 días — mínimo 2, máximo 3 por día (18 totales en la semana)</li>
+          <li><strong>Feed</strong> activo el miércoles (posteo estático) y el sábado (carrusel) — 2 posteos semanales</li>
+          <li>Ningún día queda sin actividad — presencia constante para mantener el algoritmo activo</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  function showTab(id, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  function toggle(btn, rowId) {
+    const row = document.getElementById(rowId);
+    const opening = !row.classList.contains('open');
+    row.classList.toggle('open', opening);
+    btn.classList.toggle('open', opening);
+  }
+</script>
+</body>
+</html>
