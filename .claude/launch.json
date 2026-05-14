@@ -6,6 +6,12 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "3456"],
       "port": 3456
+    },
+    {
+      "name": "cripto",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "3457", "--directory", "C:\\Users\\USUARIO\\paginas\\cripto"],
+      "port": 3457
     }
   ]
 }
